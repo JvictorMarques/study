@@ -1,0 +1,61 @@
+x-db-credentials: &db-credentials
+  POSTGRES_USER: &db-user postgres
+  POSTGRES_PASSWORD: &db-password postgres
+  POSTGRES_DB: &db-name postgres
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: react-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend
+    container_name: fastapi-app
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *db-credentials
+    depends_on:
+      - db
+      - cache
+    networks:
+      - app-network
+      - postgres
+      - redis
+  db:
+    image: postgres:15.10
+    container_name: postgres-db
+    environment:
+      <<: *db-credentials
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - postgres
+
+  cache:
+    image: redis:8.2.1
+    container_name: redis-cache
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - redis
+
+networks:
+  app-network:
+    driver: bridge
+  redis:
+    driver: bridge
+  postgres:
+    driver: bridge
