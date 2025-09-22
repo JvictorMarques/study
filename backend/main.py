@@ -1,10 +1,12 @@
+import os
+from datetime import datetime, timezone
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import redis
 import psycopg2
-import os
-from datetime import datetime, timezone
+
 
 app = FastAPI()
 app.add_middleware(
@@ -15,9 +17,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
     return {"message": "Hello from FastAPI 🚀"}
+
 
 @app.get("/health")
 def healthcheck():
@@ -77,6 +81,7 @@ def healthcheck():
     
     return health_status
 
+
 @app.get("/db-check")
 def db_check():
     try:
@@ -99,6 +104,7 @@ def db_check():
                 "error": str(e)
             }
         )
+
 
 @app.get("/cache-check")
 def cache_check():
