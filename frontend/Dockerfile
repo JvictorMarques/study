@@ -1,6 +1,9 @@
 FROM node:24.9.0-alpine3.22 AS build
 WORKDIR /app
 
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY package*.json ./
 
 RUN --mount=type=cache,target=/usr/src/app/.npm \
