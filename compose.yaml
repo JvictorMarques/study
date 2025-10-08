@@ -1,11 +1,14 @@
 x-db-credentials: &db-credentials
-  POSTGRES_USER: &db-user postgres
-  POSTGRES_PASSWORD: &db-password postgres
-  POSTGRES_DB: &db-name postgres
+  POSTGRES_USER: &db-user ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: &db-password ${POSTGRES_PASSWORD:-postgres}
+  POSTGRES_DB: &db-name ${POSTGRES_DB:-postgres}
 
 services:
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL}
     container_name: react-app
     ports:
       - "8080:8080"
@@ -20,8 +23,8 @@ services:
     container_name: fastapi-app
     ports:
       - "8000:8000"
-    environment:
-      <<: *db-credentials
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
