@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "./config";
 import HealthMonitor from "./HealthMonitor";
 import ApiDocumentation from "./ApiDocumentation";
 import "./App.css";
@@ -8,7 +9,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/")
+  fetch(API_BASE_URL)
       .then(res => res.json())
       .then(data => {
         setMessage(data.message);

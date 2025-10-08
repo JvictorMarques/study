@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_BASE_URL } from './config';
 
 const ApiDocumentation = () => {
   const [showDocs, setShowDocs] = useState(false);
@@ -109,7 +110,7 @@ const ApiDocumentation = () => {
             <ul style={{ listStyle: 'none', padding: 0 }}>
               <li style={{ marginBottom: '8px' }}>
                 <a 
-                  href="http://localhost:8000/docs" 
+                  href={API_BASE_URL + "/docs"}
                   target="_blank" 
                   rel="noopener noreferrer"
                   style={{ 
@@ -123,7 +124,7 @@ const ApiDocumentation = () => {
               </li>
               <li>
                 <a 
-                  href="http://localhost:8000/redoc" 
+                  href={API_BASE_URL + "/redoc"}
                   target="_blank" 
                   rel="noopener noreferrer"
                   style={{ 
@@ -132,7 +133,7 @@ const ApiDocumentation = () => {
                     fontSize: '0.9rem'
                   }}
                 >
-                  📋 ReDoc - Documentação Alternativa
+                  📖 ReDoc - Documentação Alternativa
                 </a>
               </li>
             </ul>

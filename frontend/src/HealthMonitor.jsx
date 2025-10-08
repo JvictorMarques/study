@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from './config';
 
 const HealthMonitor = () => {
   const [healthData, setHealthData] = useState(null);
@@ -17,7 +18,7 @@ const HealthMonitor = () => {
   const checkHealth = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/health');
+  const response = await fetch(`${API_BASE_URL}/health`);
       const data = await response.json();
       if (!response.ok) {
         setHealthData({
@@ -55,7 +56,8 @@ const HealthMonitor = () => {
   const checkRoute = async (path) => {
     try {
       const startTime = Date.now();
-      const response = await fetch(`http://localhost:8000${path}`);
+  const url = `${API_BASE_URL}${path}`;
+  const response = await fetch(url);
       const responseTime = Date.now() - startTime;
       const data = await response.json();
       
