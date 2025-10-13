@@ -1,5 +1,5 @@
 # Stage 1: Builder - Instalar dependências
-FROM python:3.13.7-slim AS build
+FROM python:3.14.0-slim AS build
 WORKDIR /app
 
 RUN python -m venv /opt/venv
@@ -8,7 +8,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-FROM python:3.13.7-slim
+FROM python:3.14.0-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y curl \
