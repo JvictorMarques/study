@@ -1,4 +1,4 @@
-FROM node:24.9.0-alpine3.22 AS build
+FROM node:24.10.0-alpine3.22 AS build
 WORKDIR /app
 
 ARG VITE_API_URL
