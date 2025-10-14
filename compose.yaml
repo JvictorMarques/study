@@ -16,7 +16,7 @@ services:
       backend:
         condition: service_healthy
     networks:
-      - app-network
+      - app
 
   backend:
     build: ./backend
@@ -27,22 +27,22 @@ services:
       DB_USER: *db-user
       DB_PASSWORD: *db-password
       DB_NAME: *db-name
-      DB_HOST: db
+      DB_HOST: postgres
       DB_PORT: 5432
-      REDIS_HOST: cache
+      REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
-      cache:
+      redis:
         condition: service_healthy
     networks:
-      - app-network
+      - app
       - postgres
       - redis
   postgres:
     image: postgres:15.10
-    container_name: postgres-db
+    container_name: postgres
     environment:
       <<: *db-credentials
     healthcheck:
@@ -55,7 +55,7 @@ services:
 
   redis:
     image: redis:8.2.1
-    container_name: redis-cache
+    container_name: redis
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -65,7 +65,7 @@ services:
       - redis
 
 networks:
-  app-network:
+  app:
     driver: bridge
   redis:
     driver: bridge
