@@ -1,4 +1,4 @@
-# Web App Deploy - FastAPI + React + Docker Compose
+# Web App Deploy - FastAPI + React
 
 Este projeto é um dashboard de monitoramento fullstack, composto por um backend em FastAPI e um frontend em React. O sistema monitora a saúde do backend, banco de dados PostgreSQL e cache Redis, além de fornecer documentação interativa da API.
 

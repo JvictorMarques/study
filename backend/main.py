@@ -42,12 +42,16 @@ def get_redis_connection():
 
 @app.get("/health")
 def liveness_probe():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy"
+        }
 
 
 @app.get("/")
 def root():
-    return {"message": "Hello from FastAPI 🚀"}
+    return {
+        "message": "Hello from FastAPI 🚀"
+        }
 
 
 @app.get("/ready")
