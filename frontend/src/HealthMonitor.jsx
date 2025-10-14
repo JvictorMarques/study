@@ -10,6 +10,7 @@ const HealthMonitor = () => {
 
   const apiRoutes = [
     { method: 'GET', path: '/', description: 'Root endpoint' },
+    { method: 'GET', path: '/ready', description: 'Readiness probe (Kubernetes): indica se a aplicação está pronta para receber tráfego' },
     { method: 'GET', path: '/health', description: 'Health check' },
     { method: 'GET', path: '/db-check', description: 'Database check' },
     { method: 'GET', path: '/cache-check', description: 'Cache check' }

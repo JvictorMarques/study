@@ -18,6 +18,10 @@ app.add_middleware(
 )
 
 
+@app.get("/ready")
+def readiness_probe():
+    return {"status": "ready"}
+
 @app.get("/")
 def root():
     return {"message": "Hello from FastAPI 🚀"}
@@ -39,11 +43,11 @@ def healthcheck():
     
     try:
         conn = psycopg2.connect(
-            dbname=os.environ.get("POSTGRES_DB", "postgres"),
-            user=os.environ.get("POSTGRES_USER", "postgres"), 
-            password=os.environ.get("POSTGRES_PASSWORD", "postgres"),
-            host=os.environ.get("DB_HOST", "db"),
-            port=os.environ.get("DB_PORT", "5432")
+            dbname=os.environ["DB_NAME"],
+            user=os.environ["DB_USER"],
+            password=os.environ["DB_PASSWORD"],
+            host=os.environ["DB_HOST"],
+            port=os.environ["DB_PORT"]
         )
         conn.close()
         health_status["services"]["database"] = "healthy"
@@ -58,8 +62,8 @@ def healthcheck():
     
     try:
         r = redis.Redis(
-            host=os.environ.get("REDIS_HOST", "cache"), 
-            port=int(os.environ.get("REDIS_PORT", "6379")), 
+            host=os.environ["REDIS_HOST"],
+            port=int(os.environ["REDIS_PORT"]),
             decode_responses=True
         )
         r.ping()
@@ -86,11 +90,11 @@ def healthcheck():
 def db_check():
     try:
         conn = psycopg2.connect(
-            dbname=os.environ.get("POSTGRES_DB", "postgres"),
-            user=os.environ.get("POSTGRES_USER", "postgres"),
-            password=os.environ.get("POSTGRES_PASSWORD", "postgres"),
-            host=os.environ.get("DB_HOST", "db"),
-            port=os.environ.get("DB_PORT", "5432")
+            dbname=os.environ["DB_NAME"],
+            user=os.environ["DB_USER"],
+            password=os.environ["DB_PASSWORD"],
+            host=os.environ["DB_HOST"],
+            port=os.environ["DB_PORT"]
         )
         conn.close()
         return {"status": "✅ DB conectado", "service": "database", "healthy": True}
@@ -110,8 +114,8 @@ def db_check():
 def cache_check():
     try:
         r = redis.Redis(
-            host=os.environ.get("REDIS_HOST", "cache"), 
-            port=int(os.environ.get("REDIS_PORT", "6379")), 
+            host=os.environ["REDIS_HOST"],
+            port=int(os.environ["REDIS_PORT"]),
             decode_responses=True
         )
         r.set("teste", "ok")

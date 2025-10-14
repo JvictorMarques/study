@@ -13,6 +13,12 @@ const ApiDocumentation = () => {
     },
     {
       method: 'GET',
+      path: '/ready',
+      description: 'Readiness probe: indica se a aplicação está pronta para receber tráfego (usado pelo Kubernetes)',
+      response: '{"status": "ready"}'
+    },
+    {
+      method: 'GET',
       path: '/health',
       description: 'Verifica a saúde do sistema e serviços conectados',
       response: '{"status": "healthy", "timestamp": "...", "services": {...}}'

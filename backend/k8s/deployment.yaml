@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-api
+  template:
+    metadata:
+      labels:
+        app: web-api
+    spec:
+      containers:
+      - name: web-api
+        image: your-backend-image:latest #TODO Change to backend image
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: POSTGRES_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: POSTGRES_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: POSTGRES_DB
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_PORT
+          value: "5432" 
+        - name: REDIS_HOST
+          value: "redis-cache" #TODO Change if necessary
+        - name: REDIS_PORT
+          value: "6379"
+        startupProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000

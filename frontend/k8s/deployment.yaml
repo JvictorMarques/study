@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-frontend
+  template:
+    metadata:
+      labels:
+        app: web-frontend
+    spec:
+      containers:
+      - name: web-frontend
+        image: your-frontend-image:latest #TODO Change to frontend image
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
