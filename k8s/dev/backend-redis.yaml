@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: backend-redis
+spec:
+  serviceName: backend-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-redis
+  template:
+    metadata:
+      labels:
+        app: backend-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:8.2.1
+        ports:
+        - containerPort: 6379
+          name: db
+        volumeMounts:
+        - name: redis-data
+          mountPath: redis-data
+        startupProbe:
+          initialDelaySeconds: 5
+          exec:
+            command: ["redis-cli", "ping"]
+        livenessProbe:
+          periodSeconds: 10
+          timeoutSeconds: 2
+          exec:
+            command: ["redis-cli", "ping"]
+        readinessProbe:
+          periodSeconds: 5
+          exec:
+            command: ["redis-cli", "ping"]
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-redis
+spec:
+  clusterIP: None
+  selector:
+    app: backend-redis
+  ports:
+  - port: 6379
+    targetPort: 6379

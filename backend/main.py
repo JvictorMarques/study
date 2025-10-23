@@ -17,8 +17,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 g = Github()
-repo = g.get_repo("jvictormarques/k8s-study")
+repo = g.get_repo(os.environ["GITHUB_REPO"])
 
 
 def get_db_connection():
@@ -40,6 +42,22 @@ def get_redis_connection():
     return r
 
 
+def get_github_version():
+    try:
+        r = get_redis_connection()
+        version = r.get("github_latest_release_version")
+        if not version:
+            version = repo.get_latest_release().tag_name
+            r.set("github_latest_release_version", version, ex=3600)
+    except Exception as e:
+        version = "unknown"
+        try:
+            r.set("unknown", version, ex=3600)
+        except Exception:
+            pass
+    return version
+
+
 @app.get("/health")
 def liveness_probe():
     return {
@@ -56,11 +74,10 @@ def root():
 
 @app.get("/ready")
 def readiness_probe():
-
     ready_status = {
         "status": "ready",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": repo.get_latest_release().tag_name,
+        "version": get_github_version(),
         "uptime": "Running",
         "services": {
             "database": "unknown",

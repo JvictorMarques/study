@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-postgres
+type: Opaque
+data:
+  POSTGRES_USER: cG9zdGdyZXNfdXNlcg==
+  POSTGRES_DB: cG9zdGdyZXM=
+  POSTGRES_PASSWORD: cG9zdGdyZXMxMjM=
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: backend-postgres
+spec:
+  serviceName: backend-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-postgres
+  template:
+    metadata:
+      labels:
+        app: backend-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        envFrom:
+        - secretRef:
+            name: backend-postgres
+        ports:
+        - containerPort: 5432
+          name: db
+        startupProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+          exec:
+            command: ["pg_isready", "-U", "postgres"]
+        livenessProbe:
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          exec:
+            command: ["pg_isready", "-U", "postgres"]
+        readinessProbe:
+          periodSeconds: 5
+          timeoutSeconds: 3
+          exec:
+            command: ["pg_isready", "-U", "postgres"]
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+          subPath: pgdata
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: ["ReadWriteOncePod"]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-postgres
+spec:
+  clusterIP: None
+  selector:
+    app: backend-postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
