@@ -21,6 +21,8 @@ start_cluster() {
   kind create cluster --name "$CLUSTER_NAME" --config k8s/kind-config.yaml
   kubectl apply -f k8s/cluster
   kubectl apply -f k8s/dev/namespace.yaml
+  kubectl apply -f k8s/dev/resource-quota.yaml
+  kubectl apply -f k8s/dev/limit-range.yaml
   kubectl apply -f k8s/dev/
 }
 
