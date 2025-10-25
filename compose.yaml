@@ -31,6 +31,7 @@ services:
       DB_PORT: 5432
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      GITHUB_REPO: ${GITHUB_REPO}
     depends_on:
       postgres:
         condition: service_healthy

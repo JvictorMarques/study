@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web-app-api
+  namespace: dev
 spec:
   replicas: 3
   selector:
@@ -43,17 +44,17 @@ spec:
           value: jvictormarques/k8s-study
         resources:
           limits:
-            memory: "128Mi"
-            cpu: "500m"
+            memory: "256Mi"
+            cpu: "400m"
           requests:
-            memory: "64Mi"
-            cpu: "250m"
+            memory: "128Mi"
+            cpu: "200m"
         ports:
         - containerPort: 8000
         startupProbe:
           initialDelaySeconds: 5
           periodSeconds: 10
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           failureThreshold: 3
           httpGet:
             path: /
@@ -67,8 +68,8 @@ spec:
             path: /health
             port: 8000
         readinessProbe:
-          initialDelaySeconds: 10
-          periodSeconds: 15
+          initialDelaySeconds: 5
+          periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
           successThreshold: 2
@@ -80,6 +81,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: web-app-api
+  namespace: dev
 spec:
   selector:
     app: web-api

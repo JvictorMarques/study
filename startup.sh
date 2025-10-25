@@ -20,7 +20,8 @@ start_cluster() {
 
   kind create cluster --name "$CLUSTER_NAME" --config k8s/kind-config.yaml
   kubectl apply -f k8s/cluster
-  kubectl apply -f k8s/dev
+  kubectl apply -f k8s/dev/namespace.yaml
+  kubectl apply -f k8s/dev/
 }
 
 if [[ "$1" == "--delete" || "$1" == "-d" ]]; then
