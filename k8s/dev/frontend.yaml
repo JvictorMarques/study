@@ -4,7 +4,7 @@ metadata:
   name: web-app-frontend
   namespace: dev
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: web-frontend
@@ -18,11 +18,11 @@ spec:
         image: jvictorsm/frontend
         resources:
           limits:
-            memory: "256Mi"
-            cpu: "400m"
-          requests:
             memory: "128Mi"
-            cpu: "200m"
+            cpu: "100m"
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
         ports:
         - containerPort: 8080
         livenessProbe:

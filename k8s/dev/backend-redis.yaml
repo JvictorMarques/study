@@ -24,12 +24,12 @@ spec:
         - name: redis-data
           mountPath: redis-data
         resources:
-          requests:
-            cpu: "200m"
-            memory: "128Mi"
           limits:
-            cpu: "400m"
-            memory: "256Mi"
+            cpu: "100m"
+            memory: "128Mi"
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
         startupProbe:
           initialDelaySeconds: 5
           periodSeconds: 10
