@@ -4,7 +4,7 @@ metadata:
   name: web-app-frontend
   namespace: dev
 spec:
-  replicas: 5
+  replicas: 3
   selector:
     matchLabels:
       app: web-frontend
@@ -55,4 +55,31 @@ spec:
     targetPort: 8080
     nodePort: 30000
   type: NodePort
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-frontend
+  namespace: dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-app-frontend
+  minReplicas: 3
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+    behavior:
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
 
