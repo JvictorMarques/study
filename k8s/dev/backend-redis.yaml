@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: backend-redis
+  name: redis
   namespace: dev
 spec:
-  serviceName: backend-redis
-  replicas: 1
+  serviceName: redis
+  replicas: 3
   selector:
     matchLabels:
-      app: backend-redis
+      db: redis
   template:
     metadata:
       labels:
-        app: backend-redis
+        db: redis
     spec:
       containers:
       - name: redis
@@ -20,9 +20,6 @@ spec:
         ports:
         - containerPort: 6379
           name: db
-        volumeMounts:
-        - name: redis-data
-          mountPath: redis-data
         resources:
           limits:
             cpu: "100m"
@@ -51,6 +48,21 @@ spec:
           failureThreshold: 3
           exec:
             command: ["redis-cli", "ping"]
+        volumeMounts:
+        - name: redis-data
+          mountPath: redis-data
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchExpressions:
+                - key: db
+                  operator: In
+                  values:
+                  - redis
   volumeClaimTemplates:
   - metadata:
       name: redis-data
@@ -63,12 +75,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-redis
+  name: redis
   namespace: dev
 spec:
   clusterIP: None
   selector:
-    app: backend-redis
+    db: redis
   ports:
   - port: 6379
     targetPort: 6379

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: backend-postgres
+  name: postgres
   namespace: dev
 type: Opaque
 data:
@@ -12,25 +12,25 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: backend-postgres
+  name: postgres
   namespace: dev
 spec:
-  serviceName: backend-postgres
-  replicas: 1
+  serviceName: postgres
+  replicas: 3
   selector:
     matchLabels:
-      app: backend-postgres
+      db: postgres
   template:
     metadata:
       labels:
-        app: backend-postgres
+        db: postgres
     spec:
       containers:
       - name: postgres
         image: postgres:15
         envFrom:
         - secretRef:
-            name: backend-postgres
+            name: postgres
         ports:
         - containerPort: 5432
           name: db
@@ -66,6 +66,18 @@ spec:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
           subPath: pgdata
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchExpressions:
+                - key: db
+                  operator: In
+                  values:
+                  - postgres
   volumeClaimTemplates:
   - metadata:
       name: postgres-storage
@@ -78,12 +90,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-postgres
+  name: postgres
   namespace: dev
 spec:
   clusterIP: None
   selector:
-    app: backend-postgres
+    db: postgres
   ports:
   - port: 5432
     targetPort: 5432
