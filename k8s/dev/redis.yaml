@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: redis
-        image: redis:8.2.1
+        image: redis:7.2
         ports:
         - containerPort: 6379
           name: db
@@ -50,7 +50,7 @@ spec:
             command: ["redis-cli", "ping"]
         volumeMounts:
         - name: redis-data
-          mountPath: redis-data
+          mountPath: /redis-data
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -71,6 +71,27 @@ spec:
       resources:
         requests:
           storage: 1Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis
+  namespace: dev
+spec:
+  podSelector:
+    matchLabels:
+      db: redis
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: web-api
+    ports:
+    - protocol: TCP
+      port: 6379
 ---
 apiVersion: v1
 kind: Service

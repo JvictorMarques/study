@@ -50,8 +50,8 @@ function App() {
                 <span className="service-status healthy">FastAPI</span>
               </li>
               <li className="service-item">
-                <span className="service-name">🐳 Deploy</span>
-                <span className="service-status healthy">Docker Compose</span>
+                <span className="service-name">☸️ Deploy</span>
+                <span className="service-status healthy">Kubernetes</span>
               </li>
             </ul>
           </div>
