@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  limits:
+  - type: Container
+    default:
+      memory: {{ .Values.LimitRange.container.default.memory }}
+      cpu: {{ .Values.LimitRange.container.default.cpu }}
+    defaultRequest:
+      memory: {{ .Values.LimitRange.container.defaultRequest.memory }}
+      cpu: {{ .Values.LimitRange.container.defaultRequest.cpu }}
+  - type: Pod
+    min:
+      memory: {{ .Values.LimitRange.pod.min.memory }}
+      cpu: {{ .Values.LimitRange.pod.min.cpu }}
+    max:
+      cpu: {{ .Values.LimitRange.pod.max.cpu }}
+      memory: {{ .Values.LimitRange.pod.max.memory }}
+  - type: PersistentVolumeClaim
+    default:
+      storage: {{ .Values.LimitRange.persistentVolumeClaim.default.storage }}
+    defaultRequest:
+      storage: {{ .Values.LimitRange.persistentVolumeClaim.defaultRequest.storage }}
+    min:
+      storage: {{ .Values.LimitRange.persistentVolumeClaim.min.storage }}
+    max:
+      storage: {{ .Values.LimitRange.persistentVolumeClaim.max.storage }}

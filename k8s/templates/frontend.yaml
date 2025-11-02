@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-frontend
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.Frontend.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-frontend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-frontend
+    spec:
+      containers:
+      - name: frontend
+        {{ if eq .Release.Namespace "prod" }}
+        image: jvictorsm/frontend:prod
+        {{ else }}
+        image: jvictorsm/frontend:dev
+        {{ end }}
+        resources:
+          limits:
+            cpu: {{ .Values.Frontend.resources.limits.cpu | quote }}
+            memory: {{ .Values.Frontend.resources.limits.memory | quote }}
+          requests:
+            cpu: {{ .Values.Frontend.resources.requests.cpu | quote }}
+            memory: {{ .Values.Frontend.resources.requests.memory | quote }}
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: {{ .Values.Frontend.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.Frontend.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.Frontend.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.Frontend.livenessProbe.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: {{ .Values.Frontend.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.Frontend.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.Frontend.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.Frontend.readinessProbe.failureThreshold }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 10
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ .Release.Name }}-frontend
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-frontend
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-frontend
+  minReplicas: {{ .Values.Frontend.replicas | int }}
+  maxReplicas: {{ .Values.Frontend.replicas | int | mul 2 }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.Frontend.hpa.cpu.targetAverageUtilization }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.Frontend.hpa.memory.targetAverageUtilization }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        periodSeconds: 15
+        value: 50
+    scaleDown:
+      stabilizationWindowSeconds: 10
+      policies:
+      - type: Percent
+        periodSeconds: 15
+        value: 50
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: frontend
+#   namespace: dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: web-frontend
+#   policyTypes:
+#   - Ingress
+#   - Egress
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-frontend
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}-frontend
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: {{ .Values.Frontend.ports.nodePort }}
+  type: NodePort

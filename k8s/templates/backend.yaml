@@ -1,0 +1,172 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.Backend.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-api
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-api
+    spec:
+      containers:
+      - name: api
+        image: jvictorsm/backend
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgres
+              key: POSTGRES_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgres
+              key: POSTGRES_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgres
+              key: POSTGRES_DB
+        - name: DB_HOST
+          value: {{ .Release.Name }}-postgres
+        - name: DB_PORT
+          value: {{ .Values.Postgres.ports.target | quote }}
+        - name: REDIS_HOST
+          value: {{ .Release.Name }}-redis
+        - name: REDIS_PORT
+          value: {{ .Values.Redis.ports.target | quote }}
+        - name: GITHUB_REPO
+          value: {{ .Values.Backend.data.GITHUB_REPO | quote }}
+        resources:
+          limits:
+            cpu: {{ .Values.Backend.resources.limits.cpu | quote }}
+            memory: {{ .Values.Backend.resources.limits.memory | quote }}
+          requests:
+            cpu: {{ .Values.Backend.resources.requests.cpu | quote }}
+            memory: {{ .Values.Backend.resources.requests.memory | quote }}
+        ports:
+        - name: app
+          containerPort: 8000
+        startupProbe:
+          initialDelaySeconds: {{ .Values.Backend.startupProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.Backend.startupProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.Backend.startupProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.Backend.startupProbe.failureThreshold }}
+          httpGet:
+            path: /
+            port: 8000
+        livenessProbe:
+          initialDelaySeconds: {{ .Values.Backend.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.Backend.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.Backend.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.Backend.livenessProbe.failureThreshold }}
+          httpGet:
+            path: /health
+            port: 8000
+        readinessProbe:
+          initialDelaySeconds: {{ .Values.Backend.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.Backend.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.Backend.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.Backend.readinessProbe.failureThreshold }}
+          successThreshold: {{ .Values.Backend.readinessProbe.successThreshold }}
+          httpGet:
+            path: /ready
+            port: 8000
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 10
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ .Release.Name }}-api
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-api
+  minReplicas: {{ .Values.Backend.replicas | int }}
+  maxReplicas: {{ .Values.Backend.replicas | int | mul 2 }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.Backend.hpa.cpu.targetAverageUtilization }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.Backend.hpa.memory.targetAverageUtilization }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        periodSeconds: 15
+        value: 50
+    scaleDown:
+      stabilizationWindowSeconds: 10
+      policies:
+      - type: Percent
+        periodSeconds: 15
+        value: 50
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: backend
+#   namespace: dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: web-api
+#   policyTypes:
+#   - Ingress
+#   - Egress
+#   egress:
+#   - to:
+#     - podSelector:
+#         matchLabels:
+#           db: postgres
+#     ports:
+#     - protocol: TCP
+#       port: 5432
+#   - to:
+#     - podSelector:
+#         matchLabels:
+#           db: redis
+#     ports:
+#     - protocol: TCP
+#       port: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}-api
+  ports:
+  - port: 8000
+    targetPort: 8000
+    nodePort: {{ .Values.Backend.ports.nodePort }}
+  type: NodePort

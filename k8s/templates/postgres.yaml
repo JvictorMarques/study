@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-postgres
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  POSTGRES_USER: {{ .Values.Postgres.data.POSTGRES_USER | b64enc }}
+  POSTGRES_DB: {{ .Values.Postgres.data.POSTGRES_DB | b64enc }}
+  POSTGRES_PASSWORD: {{ .Values.Postgres.data.POSTGRES_PASSWORD | b64enc }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-postgres
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: {{ .Release.Name }}-postgres
+  replicas: 3
+  selector:
+    matchLabels:
+      db: {{ .Release.Name }}-postgres
+  template:
+    metadata:
+      labels:
+        db: {{ .Release.Name }}-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        envFrom:
+        - secretRef:
+            name: {{ .Release.Name }}-postgres
+        ports:
+        - name: postgres
+          containerPort: 5432
+        resources:
+          requests:
+            cpu: {{ .Values.Postgres.resources.requests_limits.cpu | quote }}
+            memory: {{ .Values.Postgres.resources.requests_limits.memory | quote }}
+          limits:
+            cpu: {{ .Values.Postgres.resources.requests_limits.cpu | quote }}
+            memory: {{ .Values.Postgres.resources.requests_limits.memory | quote }}
+        startupProbe:
+          initialDelaySeconds: {{ .Values.Postgres.startupProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.Postgres.startupProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.Postgres.startupProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.Postgres.startupProbe.failureThreshold }}
+          exec:
+            command: ["pg_isready", "-U", "postgres"]
+        livenessProbe:
+          initialDelaySeconds: {{ .Values.Postgres.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.Postgres.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.Postgres.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.Postgres.livenessProbe.failureThreshold }}
+          exec:
+            command: ["pg_isready", "-U", "postgres"]
+        readinessProbe:
+          initialDelaySeconds: {{ .Values.Postgres.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.Postgres.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.Postgres.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.Postgres.readinessProbe.failureThreshold }}
+          exec:
+            command: ["pg_isready", "-U", "postgres"]
+        volumeMounts:
+        - name: {{ .Values.Postgres.volumes.name }}
+          mountPath: /var/lib/postgresql/data
+          subPath: pgdata
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchExpressions:
+                - key: db
+                  operator: In
+                  values:
+                  - {{ .Release.Name }}-postgres
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ .Values.Postgres.volumes.name }}
+    spec:
+      accessModes: ["ReadWriteOncePod"]
+      resources:
+        requests:
+          storage: {{ .Values.Postgres.volumes.resources.requests.storage }}
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: postgres
+#   namespace: dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       db: postgres
+#   policyTypes:
+#     - Ingress
+#     - Egress
+#   ingress:
+#   - from:
+#     - podSelector:
+#         matchLabels:
+#           app: web-api
+#     ports:
+#     - protocol: TCP
+#       port: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgres
+  namespace: {{ .Release.Namespace }}
+spec:
+  clusterIP: None
+  selector:
+    db: {{ .Release.Name }}-postgres
+  ports:
+  - port: 5432
+    targetPort: {{ .Values.Postgres.ports.target }}
