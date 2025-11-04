@@ -142,7 +142,7 @@ VITE_API_URL=http://localhost:8000
       - Frontend:[http://localhost:8080](http://localhost:8080) 
       - Backend:[http://localhost:8000](http://localhost:8000)
 
-> O script aplica todos os manifests do diretório `k8s/dev/` após criar o cluster Kind.
+> O script aplica todos os manifests do diretório `k8s/` após criar o cluster Kind.
 
 ## Endpoints Principais
 
@@ -158,7 +158,7 @@ VITE_API_URL=http://localhost:8000
 - **Backend:** FastAPI
 - **Banco de Dados:** PostgreSQL
 - **Cache:** Redis
-- **Orquestração:** Kubernetes
+- **Orquestração:** Kubernetes + Helm
 
 ## Licença
 
