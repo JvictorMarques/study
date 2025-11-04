@@ -6,8 +6,6 @@ Este projeto é um dashboard de monitoramento fullstack com o objetivo de aprofu
 
 ```
 .
-├── .github/
-│   ├── dependabot.yml
 ├── backend/
 │   ├── Dockerfile
 │   ├── main.py
@@ -25,27 +23,32 @@ Este projeto é um dashboard de monitoramento fullstack com o objetivo de aprofu
 │       ├── HealthMonitor.jsx
 │       └── main.jsx
 ├── k8s/
+│   ├── kind-config.yaml
+│   ├── app/
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   ├── templates/
+│   │   │   ├── _NOTES.txt
+│   │   │   ├── backend.yaml
+│   │   │   ├── frontend.yaml
+│   │   │   ├── limit-range.yaml
+│   │   │   ├── network-policy.yaml
+│   │   │   ├── postgres.yaml
+│   │   │   ├── redis.yaml
+│   │   │   └── resource-quota.yaml
+│   │   └── values/
+│   │       ├── dev.yaml
+│   │       └── prod.yaml
 │   ├── cluster/
+│   │   ├── calico.yaml
 │   │   ├── components.yaml
-│   ├── dev/
-│   │   ├── backend.yaml
-│   │   ├── frontend.yaml
-│   │   ├── limit-range.yaml
-│   │   ├── namespace.yaml
-│   │   ├── postgres.yaml
-│   │   ├── redis.yaml
-│   │   └── resource-quota.yaml
-│   ├── prod/
-│       ├── backend.yaml
-│       ├── frontend.yaml
-│       ├── limit-range.yaml
-│       ├── namespace.yaml
-│       ├── postgres.yaml
-│       ├── redis.yaml
-│       └── resource-quota.yaml
+├── scripts/
+│   ├── locustfile.py
+│   ├── startup.sh
+│   └── __pycache__/
 ├── compose.yaml
-├── .env.example
-└── .gitignore
+├── LICENSE
+├── README.md
 ```
 
 ## Variáveis de Ambiente
@@ -127,12 +130,17 @@ VITE_API_URL=http://localhost:8000
    ```sh
    ./scripts/startup.sh
    ```
-   - Para reiniciar o cluster: `./scripts/startup.sh --restart`
-   - Para deletar o cluster: `./scripts/startup.sh --delete`
+   - Para iniciar apenas o cluster: `./scripts/startup.sh --cluster ou -c`
+   - Para reiniciar o cluster: `./scripts/startup.sh --restart ou -r`
+   - Para deletar o cluster: `./scripts/startup.sh --delete ou -d`
 
 4. Acesse o frontend e backend pelos endpoints:
-   - Frontend: [http://localhost:38000](http://localhost:38000)
-   - Backend: [http://localhost:38080](http://localhost:38080)
+   - Dev: 
+      - Frontend:[http://localhost:8081](http://localhost:8081) 
+      - Backend:[http://localhost:8001](http://localhost:8001)
+   - Prod: 
+      - Frontend:[http://localhost:8080](http://localhost:8080) 
+      - Backend:[http://localhost:8000](http://localhost:8000)
 
 > O script aplica todos os manifests do diretório `k8s/dev/` após criar o cluster Kind.
 
