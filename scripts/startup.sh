@@ -1,11 +1,13 @@
 #!/bin/bash
 
 CLUSTER_NAME="${2:-kind}"
+APP_NAME="status"
 
 check_dependencies() {
   command -v docker >/dev/null 2>&1 || { echo >&2 "Docker is not installed. Aborting."; exit 1; }
   command -v kind >/dev/null 2>&1 || { echo >&2 "Kind is not installed. Aborting."; exit 1; }
   command -v kubectl >/dev/null 2>&1 || { echo >&2 "Kubectl is not installed. Aborting."; exit 1; }
+  command -v helm >/dev/null 2>&1 || { echo >&2 "Helm is not installed. Aborting."; exit 1; }
 }
 
 delete_cluster() {
@@ -20,10 +22,17 @@ start_cluster() {
 
   kind create cluster --name "$CLUSTER_NAME" --config k8s/kind-config.yaml
   kubectl apply -f k8s/cluster
-  kubectl apply -f k8s/dev/namespace.yaml
-  kubectl apply -f k8s/dev/resource-quota.yaml
-  kubectl apply -f k8s/dev/limit-range.yaml
-  kubectl apply -f k8s/dev/
+
+  kubectl create namespace dev || true
+  kubectl create namespace prod || true
+
+  helm upgrade --install "$APP_NAME" ./k8s/app \
+    --namespace dev \
+    -f ./k8s/app/values/dev.yaml
+
+  helm upgrade --install "$APP_NAME" ./k8s/app \
+    --namespace prod \
+    -f ./k8s/app/values/prod.yaml
 }
 
 if [[ "$1" == "--delete" || "$1" == "-d" ]]; then

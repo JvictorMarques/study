@@ -161,3 +161,11 @@ LimitRange:
       storage: 500Mi
     max:
       storage: 5Gi
+
+ResourceQuota:
+  hard:
+    requests.cpu: 2
+    requests.memory: 2.5Gi
+    requests.storage: 6Gi
+    limits.cpu: 3
+    limits.memory: 3.5Gi

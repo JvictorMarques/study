@@ -15,11 +15,11 @@ spec:
     spec:
       containers:
       - name: frontend
-        {{ if eq .Release.Namespace "prod" }}
+        {{- if eq .Release.Namespace "prod" }}
         image: jvictorsm/frontend:prod
-        {{ else }}
+        {{- else }}
         image: jvictorsm/frontend:dev
-        {{ end }}
+        {{- end }}
         resources:
           limits:
             cpu: {{ .Values.Frontend.resources.limits.cpu | quote }}

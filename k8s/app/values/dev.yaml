@@ -1,0 +1,171 @@
+Postgres:
+  data:
+    POSTGRES_USER: postgres_user
+    POSTGRES_DB: postgres
+    POSTGRES_PASSWORD: SecurePassw0rd123!@
+
+  resources: # QoS Class: Guaranteed
+    requests_limits:
+      cpu: 200m
+      memory: 256Mi
+
+  startupProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  volumes:
+    name: postgres-data
+    resources:
+      requests:
+        storage: 1Gi
+
+  ports:
+    target: 5432
+
+Redis:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+  startupProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  volumes:
+    name: redis-data
+    resources:
+      requests:
+        storage: 1Gi
+
+  ports:
+    target: 6379
+
+Backend:
+  data:
+    GITHUB_REPO: jvictormarques/k8s-study
+
+  replicas: 3
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  startupProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 2
+
+  hpa:
+    cpu:
+      targetAverageUtilization: 80
+    memory:
+      targetAverageUtilization: 80
+
+  ports:
+    nodePort: 30001
+
+Frontend:
+  replicas: 3
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  hpa:
+    cpu:
+      targetAverageUtilization: 80
+    memory:
+      targetAverageUtilization: 80
+
+  ports: 
+    nodePort: 30081
+
+LimitRange:
+  container:
+    default:
+      memory: 128Mi
+      cpu: 100m
+    defaultRequest:
+      memory: 64Mi
+      cpu: 50m
+  pod:
+    min:
+      memory: 64Mi
+      cpu: 50m
+    max:
+      cpu: 400m
+      memory: 512Mi
+  persistentVolumeClaim:
+    default:
+      storage: 1Gi
+    defaultRequest:
+      storage: 500Mi
+    min:
+      storage: 500Mi
+    max:
+      storage: 5Gi
+
+ResourceQuota:
+  hard:
+    requests.cpu: 2
+    requests.memory: 2.5Gi
+    requests.storage: 6Gi
+    limits.cpu: 3
+    limits.memory: 3.5Gi
