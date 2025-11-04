@@ -105,7 +105,7 @@ Backend:
       targetAverageUtilization: 80
 
   ports:
-    nodePort: 30000
+    nodePort: 30001
 
 Frontend:
   replicas: 3
@@ -135,7 +135,7 @@ Frontend:
       targetAverageUtilization: 80
 
   ports: 
-    nodePort: 30080
+    nodePort: 30081
 
 LimitRange:
   container:
