@@ -51,7 +51,7 @@ function App() {
               </li>
               <li className="service-item">
                 <span className="service-name">☸️ Deploy</span>
-                <span className="service-status healthy">Kubernetes</span>
+                <span className="service-status healthy">Kubernetes + Helm</span>
               </li>
             </ul>
           </div>
