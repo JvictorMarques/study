@@ -23,6 +23,9 @@ start_cluster() {
   kind create cluster --name "$CLUSTER_NAME" --config k8s/kind-config.yaml
   kubectl apply -f k8s/cluster
 
+}
+
+start_app() {
   kubectl create namespace dev || true
   kubectl create namespace prod || true
 
@@ -41,6 +44,7 @@ if [[ "$1" == "--delete" || "$1" == "-d" ]]; then
   exit 0
 fi
 
+
 if [[ "$1" == "--restart" || "$1" == "-r" ]]; then
   check_dependencies
   delete_cluster
@@ -48,6 +52,14 @@ if [[ "$1" == "--restart" || "$1" == "-r" ]]; then
   exit 0
 fi
 
+if [[ "$1" == "--cluster" || "$1" == "-c" ]]; then
+  check_dependencies
+  start_cluster
+  exit 0
+fi
+
+
 check_dependencies
 start_cluster
+start_app
 echo "Cluster '$CLUSTER_NAME' is up and running."
