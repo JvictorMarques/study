@@ -58,5 +58,5 @@ else
   start_cluster
   start_app
   exit 0
-fi  exit 0
+fi
 echo "Cluster '$CLUSTER_NAME' is up and running."
