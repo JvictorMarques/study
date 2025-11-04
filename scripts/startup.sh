@@ -42,24 +42,21 @@ if [[ "$1" == "--delete" || "$1" == "-d" ]]; then
   echo "Deleting cluster '$CLUSTER_NAME'..."
   delete_cluster
   exit 0
-fi
-
-
-if [[ "$1" == "--restart" || "$1" == "-r" ]]; then
+elif [[ "$1" == "--restart" || "$1" == "-r" ]]; then
+  check_dependencies
+  delete_cluster
+  start_cluster
+  start_app
+  exit 0
+elif [[ "$1" == "--cluster" || "$1" == "-c" ]]; then
   check_dependencies
   delete_cluster
   start_cluster
   exit 0
-fi
-
-if [[ "$1" == "--cluster" || "$1" == "-c" ]]; then
+else
   check_dependencies
   start_cluster
+  start_app
   exit 0
-fi
-
-
-check_dependencies
-start_cluster
-start_app
+fi  exit 0
 echo "Cluster '$CLUSTER_NAME' is up and running."
