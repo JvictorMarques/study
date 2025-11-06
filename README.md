@@ -45,7 +45,6 @@ Este projeto é um dashboard de monitoramento fullstack com o objetivo de aprofu
 ├── scripts/
 │   ├── locustfile.py
 │   ├── startup.sh
-│   └── __pycache__/
 ├── compose.yaml
 ├── LICENSE
 ├── README.md
@@ -142,7 +141,9 @@ VITE_API_URL=http://localhost:8000
       - Frontend:[http://localhost:8080](http://localhost:8080) 
       - Backend:[http://localhost:8000](http://localhost:8000)
 
-> O script aplica todos os manifests do diretório `k8s/` após criar o cluster Kind.
+> O script aplica todos os charts do diretório `k8s/` após criar o cluster Kind.
+
+#### OBS: Se desejar utilizar imagens personalizadas, lembre-se de fazer o upload delas para um container registry acessível pelo cluster Kubernetes (ex: Docker Hub, GitHub Container Registry).
 
 ## Endpoints Principais
 

@@ -69,6 +69,8 @@ Redis:
     target: 6379
 
 Backend:
+  image:
+    repository: jvictorsm/backend
   data:
     GITHUB_REPO: jvictormarques/k8s-study
 
@@ -108,6 +110,8 @@ Backend:
     nodePort: 30001
 
 Frontend:
+  image:
+    repository: jvictorsm/frontend
   replicas: 3
   resources:
     limits:

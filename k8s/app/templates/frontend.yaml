@@ -16,9 +16,9 @@ spec:
       containers:
       - name: frontend
         {{- if eq .Release.Namespace "prod" }}
-        image: jvictorsm/frontend:prod
+        image: {{ .Values.Frontend.image.repository }}:prod
         {{- else }}
-        image: jvictorsm/frontend:dev
+        image: {{ .Values.Frontend.image.repository }}:dev
         {{- end }}
         resources:
           limits:
