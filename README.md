@@ -288,7 +288,9 @@ kubectl get events -n dev --sort-by='.lastTimestamp'
 
 ## Considerações Finais
 
-Este projeto foi desenvolvido com atenção a boas práticas de Kubernetes e arquitetura de aplicações distribuídas. Alguns destaques técnicos:
+Este projeto foi desenvolvido com foco nas boas práticas de Kubernetes e arquitetura de aplicações distribuídas. Cada componente foi cuidadosamente planejado e implementado para garantir desempenho, escalabilidade e manutenibilidade.
+
+Foi feito com muito carinho e atenção aos detalhes sinta-se à vontade para explorar o projeto e, caso surjam dúvidas ou sugestões, abra uma issue.
 
 ### Ideias de Melhorias
 
