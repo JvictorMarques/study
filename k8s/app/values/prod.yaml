@@ -72,7 +72,7 @@ Backend:
   image:
     repository: jvictorsm/backend
   data:
-    GITHUB_REPO: jvictormarques/k8s-study
+    GITHUB_REPO: jvictormarques/k8s-fullstack-app
 
   replicas: 3
   resources:
